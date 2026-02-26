@@ -1,59 +1,152 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🏫 SchoolApp — SaaS de Gestión Académica
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> Sistema SaaS B2B multi-tenant para Unidades Educativas en Bolivia.
+> Diseñado según la normativa del **Ministerio de Educación de Bolivia**.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🧱 Stack Técnico
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Capa | Tecnología | Versión |
+|---|---|---|
+| **Backend** | PHP + Laravel | `^8.2` / `^12.0` |
+| **Panel Admin** | Filament | `^5.2` |
+| **Testing** | PestPHP | `^4.4` |
+| **Linter PHP** | Laravel Pint | `^1.24` |
+| **DB Desarrollo** | SQLite | (driver activo en `.env`) |
+| **DB Producción** | MySQL | `8.0+` |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 🏛️ Arquitectura
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Monolito Moderno — Laravel + Filament
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+El backend sigue **Clean Architecture adaptada a Laravel**:
 
-## Laravel Sponsors
+```
+Routes → FormRequest (DTO + Validación) → Controller → UseCase → Repository → Model Eloquent
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- **`UseCases/`** — Lógica de negocio pura, sin dependencia de HTTP ni Eloquent.
+- **`Repositories/Contracts/`** — Interfaces de dominio.
+- **`Repositories/Eloquent/`** — Implementaciones concretas.
+- **Filament** — Gestiona todo el CRUD operativo (escuelas, usuarios, malla curricular).
+- **Multi-Tenant** — Aislamiento por `school_id` mediante Global Scopes en todos los Models.
 
-### Premium Partners
+### Estructura Backend (`/app`)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```
+app/
+├── Filament/
+│   └── Resources/      ← Resources de Filament (CRUD operativo).
+├── Http/
+│   ├── Controllers/    ← Solo orquestan. Nunca lógica de negocio.
+│   └── Requests/       ← FormRequests como DTOs y validadores.
+├── Models/             ← Eloquent puro + relaciones + Global Scope school_id.
+├── Repositories/
+│   ├── Contracts/      ← Interfaces (Ej: StudentRepositoryInterface).
+│   └── Eloquent/       ← Implementaciones (Ej: EloquentStudentRepository).
+└── UseCases/
+    ├── Academic/       ← CalculateTermGradesUseCase, etc.
+    ├── Attendance/     ← RegisterDailyAttendanceUseCase, etc.
+    └── Institutional/  ← SetupSchoolProfileUseCase, etc.
+```
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 📐 Dominio de Negocio
 
-## Code of Conduct
+### Entidades Críticas
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Entidad | Rol |
+|---|---|
+| `School` | Tenant raíz. Todo dato está aislado por institución. |
+| `AcademicYear` | Gestión / año lectivo. |
+| `Term` | Trimestre (máx. **3** por ley boliviana). |
+| `Level` | Grado (Ej: "1ro de Secundaria"). |
+| `Section` | **Paralelo** — unidad atómica real (Ej: "1ro A"). |
+| `Subject` | Materia asignada al Level (máx. **13** por ley). |
+| `Student` | Inscrito a un `section_id` específico. |
+| `CourseSubjectTeacher` | Pivot que vincula al docente con Materia + Paralelo. |
+| `Attendance` | Registro diario: `present` / `absent` / `late`. |
+| `EvaluationActivity` | Actividad dimensional anclada a trimestre. |
+| `Grade` | Nota individual de un alumno en una actividad. |
 
-## Security Vulnerabilities
+### Reglas de Evaluación (Ley Boliviana — No Negociables)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+| Dimensión | Máx. Puntos |
+|---|---|
+| `ser` | **10 pts** |
+| `saber` | **45 pts** |
+| `hacer` | **40 pts** |
+| `autoevaluacion` | **5 pts** |
+| **Total** | **100 pts** |
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 👥 Roles del Sistema
+
+| Rol | Interfaz | Alcance |
+|---|---|---|
+| `super_admin` | Filament | Todas las escuelas |
+| `admin` | Filament | Su `school_id` — configura malla y usuarios |
+| `director` | Filament | Su `school_id` — reportes y aprobaciones |
+| `secretaria` | Filament | Su `school_id` — filiación y reportes |
+| `coordinador` | Filament | Su `school_id` |
+| `docente` | Filament | Solo su `CourseSubjectTeacher` asignado |
+
+---
+
+## 🚀 Instalación y Desarrollo
+
+### Requisitos
+
+- PHP `^8.2`
+- Composer `^2.x`
+- SQLite (desarrollo) / MySQL 8.0+ (producción)
+
+### Setup inicial
+
+```bash
+# Instala dependencias, configura .env y migra la BD
+composer setup
+```
+
+### Comandos disponibles
+
+```bash
+composer dev      # Levanta el servidor de desarrollo
+composer test     # Ejecuta la suite de PestPHP
+composer lint     # Formatea PHP con Laravel Pint
+```
+
+---
+
+## 🧪 Matriz de Tests Críticos
+
+| ID | Descripción | Prioridad |
+|---|---|---|
+| UT-01 | Tope de actividades por dimensión `ser` | 🔥 Crítica |
+| UT-02 | Límite de puntaje en `saber` (máx 45) | 🔥 Crítica |
+| UT-03 | Cálculo de promedios internos por dimensión | 🔥 Crítica |
+| UT-04 | Suma total = 100 pts exactos | 🔥 Crítica |
+| IT-01 | Bloqueo de >13 materias por nivel | Alta |
+| IT-02 | Endpoint Centralizador <2s respuesta | 🔥 Crítica |
+
+---
+
+## 📦 Módulos del MVP
+
+| Semana | Módulo |
+|---|---|
+| 1 | **Institucional** — Perfil Escolar, Malla Curricular (Niveles + Paralelos + Materias) |
+| 2 | **Filiativo** — Estudiantes, Docentes, Carga Horaria + Evaluaciones Dimensionales |
+| 3 | **Operativa** — Asistencia Diaria, Dashboard, Cuadro de Honor, Centralizador |
+| 4 | **Certificación** — Boletines Ministerio + Pruebas finales |
+
+---
+
+## 📄 Licencia
+
+Proyecto privado — © SchoolApp. Todos los derechos reservados.
