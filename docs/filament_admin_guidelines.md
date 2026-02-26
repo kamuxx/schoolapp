@@ -59,3 +59,10 @@ Sigue este orden de creación de Recursos en Filament, priorizando de la configu
 ## Cierre de Fase
 
 Una vez desarrollados los Recursos, Filament deja de ser el foco y pasamos a **Inertia.js v2 (React)** para las pantallas del Docente (pasar lista, poner notas) porque requieren iteración custom e interactividad veloz no apta para Livewire-CRUD.
+
+
+## Para mas guia 
+
+https://codigofuente.hilariweb.com/sistema-de-gestion-escolar
+
+ver modulos
