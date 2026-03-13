@@ -1,0 +1,170 @@
+\documentclass[11pt,a4paper]{article}
+
+% Paquetes esenciales
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{titlesec}
+\usepackage{colortbl}
+\usepackage{parskip}
+\usepackage{hyperref}
+
+% Definición de colores corporativos
+\definecolor{primary}{RGB}{0, 75, 128} % Azul institucional
+\definecolor{secondary}{RGB}{44, 62, 80} % Gris oscuro
+\definecolor{accent}{RGB}{200, 50, 50} % Rojo oscuro para alertas
+\definecolor{bglight}{RGB}{245, 247, 250} % Fondo claro para cajas
+
+% Configuración de enlaces
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primary,
+    filecolor=primary,
+    urlcolor=primary,
+    pdftitle={Propuesta Estratégica SaaS Gestión Escolar}
+}
+
+% Configuración de Títulos
+\titleformat{\section}
+  {\color{primary}\Large\bfseries}
+  {\thesection}{1em}{}
+  [\vspace{-0.5em}\rule{\textwidth}{0.5pt}]
+
+\titleformat{\subsection}
+  {\color{secondary}\large\bfseries}
+  {\thesubsection}{1em}{}
+
+% Estilos de caja personalizada
+\newtcolorbox{infoBox}[1][]{
+  colback=bglight,
+  colframe=primary,
+  fonttitle=\bfseries,
+  coltitle=white,
+  title=#1,
+  arc=4mm,
+  boxrule=0.8pt,
+  left=10pt, right=10pt, top=10pt, bottom=10pt
+}
+
+\begin{document}
+
+% Portada
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    {\Huge \bfseries \color{primary} Propuesta Estratégica y Cronograma\par}
+    \vspace{0.5cm}
+    {\Large \bfseries Modelo Comercial (MVP B2B)\par}
+    
+    \vspace{2cm}
+    
+    \begin{infoBox}[Detalles del Proyecto]
+        \begin{itemize}[label=\textcolor{primary}{\textbullet}, leftmargin=*]
+            \item \textbf{Fecha:} 21 de Febrero de 2026
+            \item \textbf{Mercado Objetivo:} Bolivia
+            \item \textbf{Meta:} Lanzamiento de MVP para la gestión académica, asistencia y reportería ministerial bajo la estricta normativa evaluativa de Bolivia.
+        \end{itemize}
+    \end{infoBox}
+    
+    \vfill
+    
+    {\large Preparado por:\par}
+    \vspace{0.2cm}
+    {\Large \textbf{Lester Rodriguez}\par}
+    {\large \color{secondary} Líder Arquitecto en Venezuela\par}
+    
+    \vspace{2cm}
+\end{titlepage}
+
+\newpage
+
+\section{Plan de Entrega Detallado (4 Semanas)}
+
+El proyecto se segmentará en un plan de acción estricto para certificar cada módulo bajo los estándares de producción de la industria de software.
+
+\subsection*{Semana 1: Arquitectura y Módulo Institucional}
+\begin{itemize}[label=\textcolor{primary}{$\blacktriangleright$}]
+    \item \textbf{Módulo Empresa:} Configuración del Perfil Escolar (Nombre, Ubicación, tipo de Nivel Educativo y Carga de Logotipo Institucional).
+    \item \textbf{Base de Datos y Seguridad:} Generación del esquema Multi-tenant en código (para aislamiento de datos), Módulo de Usuarios, control de Roles y Permisos.
+    \item \textbf{Malla Curricular Base:} Creación de Niveles o Grados, habilitación oficial de \textit{``Paralelos''} (Secciones A, B, etc.) y alta del banco de Materias.
+\end{itemize}
+
+\subsection*{Semana 2: Filiación y Módulo Académico Operativo}
+\begin{itemize}[label=\textcolor{primary}{$\blacktriangleright$}]
+    \item \textbf{Módulo Filiativo Estelar:}
+    \begin{itemize}
+        \item Inscripción (Filiación) de Estudiantes ligándolos directamente a su Paralelo.
+        \item Registro de Docentes.
+        \item Asignación de Cargas Horarias: Vincular al Docente exclusivamente con su Nivel, Paralelo y Materias permitidas.
+    \end{itemize}
+    \item \textbf{Módulo Académico (Evaluaciones):}
+    \begin{itemize}
+        \item Generación de planillas de Carga de Notas, asegurando los topes estipulados de Bolivia: \textbf{Ser (10), Saber (45), Hacer (40) y Autoevaluación (5).}
+    \end{itemize}
+\end{itemize}
+
+\subsection*{Semana 3: Asistencias y Dashboards Estratégicos}
+\begin{itemize}[label=\textcolor{primary}{$\blacktriangleright$}]
+    \item \textbf{Asistencia Cotidiana:} Sistema de "1 Clic" para que el docente o secretaría marque la asistencia diaria de la sección/paralelo según la lista de filiados.
+    \item \textbf{Dashboard Institucional (Vista Admin/Director):}
+    \begin{itemize}
+        \item Panel en tiempo real: Total de registrados, Totales de Presentes en el Día y Ausentes de la escuela.
+        \item \textbf{Cuadro de Honor Dinámico:} Sistema que computa en vivo al "Mejor Estudiante" de cada Paralelo y al "Genio de Oro" del nivel completo.
+    \end{itemize}
+    \item \textbf{Centralizador Trimestral:} Tabla de Múltiple Entrada (Materias / Estudiantes) que resume las calificaciones definitivas del período en curso.
+\end{itemize}
+
+\subsection*{Semana 4: Certificación, Pruebas y Reporte Ministerial}
+\begin{itemize}[label=\textcolor{primary}{$\blacktriangleright$}]
+    \item \textbf{Auditoría de Cálculos:} Pruebas unitarias para validar las sumatorias dimensionales.
+    \item \textbf{Módulo Certificado:} Preparación, formato y exportación de Boletines individuales que plasmen las notas del estudiante para consumo de padres, e integración sugerida para el formato del Ministerio de Educación.
+\end{itemize}
+
+\section{Inversión y Lanzamiento}
+
+\subsection{Fase Core de Implementación (MVP Core)}
+\begin{tcolorbox}[colback=primary!5!white,colframe=primary!75!black,title=Inversión de Configuración y Desarrollo Base]
+    \centering \Large \textbf{Costo único: \$150 USD}
+\end{tcolorbox}
+\textbf{Incluye:} Arquitectura B2B programada específicamente para soportar el flujo de notas en Bolivia, auditoría algorítmica y primer despliegue funcional en servidor de producción para el inicio de clases (Shared Hosting / CPanel Básico). Esta inversión fondea de forma temprana y exclusiva la primera arquitectura del código base.
+
+\subsection{Modelo de Negocio (SaaS) y Sociedad}
+El verdadero valor del sistema reside en su rentabilidad como servicio escalable (\textit{Software as a Service}). Proponemos un modelo formal de participación recurrente entre las partes basado en licencias institucionales:
+
+\begin{itemize}[label=\textcolor{secondary}{\textbullet}, leftmargin=*]
+    \item \textbf{Tarifa MRR (Suscripción por Institución):} \textbf{\$30 USD / mensuales}.
+    \item \textbf{Estructura Societaria y División en Tercios (33/33/33):} Para garantizar la salud financiera del proyecto y no afectar el bolsillo de los socios, los ingresos de cada suscripción se dividirán en tres partes iguales (\$10 USD cada una):
+    \begin{enumerate}
+        \item \textbf{1/3 (Costo Operativo - "La Máquina"):} Fondo intocable destinado automáticamente a cubrir renovaciones de infraestructura técnica inicial (Shared Hosting, MySQL en CPanel y Dominios). El sistema se paga total y absolutamente solo.
+        \item \textbf{1/3 (Socio Tecnológico):} Utilidad neta para el Líder Arquitecto basado en \textbf{Venezuela} por el mantenimiento del código, prevención de caídas y mejoras de seguridad.
+        \item \textbf{1/3 (Socio Comercial):} Utilidad neta para el enlace e inversor en \textbf{Bolivia} por la prospección, cierre de escuelas y atención al usuario final.
+    \end{enumerate}
+    \item \textbf{Ajuste Inflacionario Anual:} Para asegurar un crecimiento sostenido que combata la inflación y sume rentabilidad al fondo societario, la tarifa de suscripción tendrá un incremento automático pactado de \textbf{\$5 USD} en cada renovación anual por institución.
+\end{itemize}
+
+\begin{infoBox}[Nota Estratégica de Escalabilidad]
+Al construir el sistema bajo arquitectura \textit{``Multi-tenant''}, el esfuerzo informático para anexar al segundo, quinto o décimo colegio es nulo. El software se escala hacia un ingreso pasivo y masivo.
+\end{infoBox}
+
+\vspace{2cm}
+
+\section*{Firma de Conformidad}
+
+\vspace{2cm}
+
+\noindent
+\begin{tabular}{@{}p{0.45\textwidth} p{0.1\textwidth} p{0.45\textwidth}@{}}
+\hrulefill & & \hrulefill \\
+\textbf{Socio Inversor / Ventas} & & \textbf{Lester Rodriguez} \\
+Representante en Bolivia & & Líder Arquitecto en Venezuela \\
+\end{tabular}
+
+\end{document}

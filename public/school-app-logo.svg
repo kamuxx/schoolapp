@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <!-- Gradiente principal azul metalizado -->
+    <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1E3A8A;stop-opacity:1" />
+      <stop offset="30%" style="stop-color:#2563EB;stop-opacity:1" />
+      <stop offset="60%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1E40AF;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Gradiente metálico secundario -->
+    <linearGradient id="metallicShine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#60A5FA;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#1E3A8A;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#1E40AF;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Brillo metálico -->
+    <linearGradient id="shineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#93C5FD;stop-opacity:0.6" />
+      <stop offset="50%" style="stop-color:#3B82F6;stop-opacity:0" />
+    </linearGradient>
+    
+    <!-- Sombra -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="4" stdDeviation="5" flood-color="#0F172A" flood-opacity="0.4"/>
+    </filter>
+    
+    <!-- Gradiente para el libro -->
+    <linearGradient id="bookGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E2E8F0;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Gradiente gorro -->
+    <linearGradient id="capGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#334155" />
+      <stop offset="100%" style="stop-color:#1E293B" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Círculo de fondo con efecto metálico -->
+  <circle cx="100" cy="100" r="90" fill="url(#primaryGradient)" filter="url(#shadow)"/>
+  
+  <!-- Brillo metálico superior -->
+  <ellipse cx="80" cy="60" rx="50" ry="30" fill="url(#shineGradient)"/>
+  
+  <!-- Círculo interior decorativo -->
+  <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+  <circle cx="100" cy="100" r="75" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  
+  <!-- Libro abierto (base de la educación) -->
+  <g transform="translate(100, 115)">
+    <!-- Página izquierda del libro -->
+    <path d="M-5,0 Q-35,-5 -45,15 L-45,35 Q-35,25 -5,30 Z" 
+          fill="url(#bookGradient)" stroke="#CBD5E1" stroke-width="1"/>
+    
+    <!-- Página derecha del libro -->
+    <path d="M5,0 Q35,-5 45,15 L45,35 Q35,25 5,30 Z" 
+          fill="url(#bookGradient)" stroke="#CBD5E1" stroke-width="1"/>
+    
+    <!-- Líneas del libro (texto) -->
+    <line x1="-38" y1="20" x2="-12" y2="18" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
+    <line x1="-35" y1="27" x2="-12" y2="25" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
+    <line x1="38" y1="20" x2="12" y2="18" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
+    <line x1="35" y1="27" x2="12" y2="25" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
+    
+    <!-- Unión del libro -->
+    <path d="M-5,0 L0,-3 L5,0 L5,30 L0,33 L-5,30 Z" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+  </g>
+  
+  <!-- Gorro de graduación -->
+  <g transform="translate(100, 65)">
+    <!-- Parte superior del gorro -->
+    <polygon points="0,-25 -35,-5 0,5 35,-5" fill="url(#capGradient)"/>
+    
+    <!-- Borde inferior -->
+    <rect x="-30" y="-5" width="60" height="8" rx="1" fill="#0F172A"/>
+    
+    <!-- Borla -->
+    <line x1="0" y1="-25" x2="15" y2="-40" stroke="#FBBF24" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="15" cy="-42" r="5" fill="#FBBF24"/>
+    
+    <!-- Decoración en el gorro -->
+    <circle cx="0" cy="-10" r="4" fill="#FBBF24"/>
+  </g>
+  
+  <!-- Icono de engranaje (gestión/administración) -->
+  <g transform="translate(155, 50)">
+    <circle cx="0" cy="0" r="12" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <circle cx="0" cy="0" r="5" fill="rgba(255,255,255,0.9)"/>
+    <!-- Dientes del engranaje -->
+    <rect x="-3" y="-18" width="6" height="8" rx="1" fill="rgba(255,255,255,0.9)"/>
+    <rect x="-3" y="10" width="6" height="8" rx="1" fill="rgba(255,255,255,0.9)"/>
+    <rect x="-18" y="-3" width="8" height="6" rx="1" fill="rgba(255,255,255,0.9)"/>
+    <rect x="10" y="-3" width="8" height="6" rx="1" fill="rgba(255,255,255,0.9)"/>
+  </g>
+  
+  <!-- Pequeños elementos decorativos (puntos/datos) -->
+  <circle cx="45" cy="55" r="4" fill="rgba(255,255,255,0.5)"/>
+  <circle cx="55" cy="70" r="3" fill="rgba(255,255,255,0.35)"/>
+  <circle cx="40" cy="75" r="2" fill="rgba(255,255,255,0.45)"/>
+  
+  <!-- Texto "School App" - posicionado debajo del libro -->
+  <text x="100" y="162" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#FFFFFF" letter-spacing="1">
+    School App
+  </text>
+</svg>
