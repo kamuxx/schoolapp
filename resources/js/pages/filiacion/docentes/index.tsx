@@ -76,7 +76,7 @@ interface TeacherAssignment {
     subject_id: number;
     section_id: number;
     subject: { id: number; name: string };
-    section: { id: number; name: string; level?: { id: number; name: string } };
+    section: { id: number; name: string; students_count?: number; level?: { id: number; name: string } };
     schedules: {
         id: number;
         day_of_week: number;
@@ -1348,6 +1348,12 @@ export default function Employees({ employees }: Props) {
                                                                 const level = cargaData?.assignments.find(a => a.section.level?.id === levelId)?.section.level;
                                                                 const levelAssignments = cargaData?.assignments.filter(a => a.section.level?.id === levelId);
                                                                 
+                                                                // Calcular Total Nivel sumando estudiantes de secciones ÚNICAS
+                                                                const uniqueSectionsInLevel = Array.from(
+                                                                    new Map(levelAssignments?.map(a => [a.section.id, a.section])).values()
+                                                                );
+                                                                const totalStudentsInLevel = uniqueSectionsInLevel.reduce((sum, section) => sum + (section.students_count || 0), 0);
+
                                                                 return (
                                                                     <AccordionItem key={levelId} value={`level-${levelId}`} className="border rounded-2xl px-4 bg-white shadow-sm overflow-hidden border-zinc-100">
                                                                         <AccordionTrigger className="hover:no-underline py-4">
@@ -1359,9 +1365,14 @@ export default function Employees({ employees }: Props) {
                                                                                     <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none mb-1">Nivel / Grado</p>
                                                                                     <h5 className="font-bold text-zinc-900 leading-none">{level?.name}</h5>
                                                                                 </div>
-                                                                                <span className="ml-4 px-2 py-0.5 bg-zinc-100 text-[10px] font-bold text-zinc-500 rounded-full">
-                                                                                    {levelAssignments?.length} Materias
-                                                                                </span>
+                                                                                <div className="ml-4 flex items-center gap-2">
+                                                                                    <span className="px-2 py-0.5 bg-zinc-100 text-[10px] font-bold text-zinc-500 rounded-full">
+                                                                                        {levelAssignments?.length} Materias
+                                                                                    </span>
+                                                                                    <span className="px-2 py-0.5 bg-indigo-100 text-[10px] font-bold text-indigo-700 rounded-full">
+                                                                                        Total Nivel: {totalStudentsInLevel}
+                                                                                    </span>
+                                                                                </div>
                                                                             </div>
                                                                         </AccordionTrigger>
                                                                         <AccordionContent className="pb-4 pt-2">
@@ -1374,7 +1385,9 @@ export default function Employees({ employees }: Props) {
                                                                                             </div>
                                                                                             <div>
                                                                                                 <p className="text-sm font-bold text-zinc-800">{assignment.subject.name}</p>
-                                                                                                <p className="text-[10px] text-zinc-500 font-medium italic">{assignment.section.name}</p>
+                                                                                                <p className="text-[10px] text-zinc-500 font-medium italic">
+                                                                                                    {assignment.section.name} : <span className="font-bold text-zinc-700">{assignment.section.students_count || 0} estudiantes</span>
+                                                                                                </p>
                                                                                             </div>
                                                                                         </div>
                                                                                         <div className="flex items-center gap-4">

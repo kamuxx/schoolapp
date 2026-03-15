@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - `TypeError` en `GetTeacherAssignmentsUseCase` corrigiendo el acceso al ID del usuario a través de la relación del modelo `Employee`.
 
 ### Added
+- Visualización de cantidad de estudiantes por sección y total por nivel en la Ficha del Docente facilitando el monitoreo de carga académica.
 - README.md profesional con stack completo, arquitectura, entidades de dominio, roles, comandos de desarrollo y matriz de tests críticos.
 - CHANGELOG.md inicial del proyecto.
 
