@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToSchool;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\BelongsToSchool;
 
 class Student extends Model
 {
-    use SoftDeletes, BelongsToSchool;
+    use BelongsToSchool, SoftDeletes;
 
     protected $fillable = [
         'school_id',
@@ -28,6 +28,7 @@ class Student extends Model
         'gender',
         'photo_path',
         'is_active',
+        'condition',
         'created_by',
         'updated_by',
         'deleted_by',
@@ -93,16 +94,20 @@ class Student extends Model
         return $this->enrollments()->where('status', 'active')->first();
     }
 
-    public function scopeSearchStudent(\Illuminate\Database\Eloquent\Builder $builder, array $filters = [], ?int $limit = 10, ?int $offset = 0) {
+    public function scopeSearchStudent(\Illuminate\Database\Eloquent\Builder $builder, array $filters = [], ?int $limit = 10, ?int $offset = 0)
+    {
         if (isset($filters['search'])) {
             $builder->where(function ($q) use ($filters) {
                 $q->where('first_name', 'like', "%{$filters['search']}%")
-                  ->orWhere('last_name', 'like', "%{$filters['search']}%")
-                  ->orWhere('student_code', 'like', "%{$filters['search']}%")
-                  ->orWhere('national_id_number', 'like', "%{$filters['search']}%");
+                    ->orWhere('last_name', 'like', "%{$filters['search']}%")
+                    ->orWhere('student_code', 'like', "%{$filters['search']}%")
+                    ->orWhere('national_id_number', 'like', "%{$filters['search']}%");
             });
         }
-        if ($limit !== null && $offset !== null) { $builder->limit($limit)->offset($offset); }
+        if ($limit !== null && $offset !== null) {
+            $builder->limit($limit)->offset($offset);
+        }
+
         return $builder;
     }
 }

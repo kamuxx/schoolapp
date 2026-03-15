@@ -47,7 +47,7 @@ export default function Login({
                                     tabIndex={1}
                                     autoComplete="email"
                                     placeholder="Email"
-                                    className="border-0 border-b-2 border-slate-300 bg-transparent px-0 py-3 text-slate-900 placeholder:text-slate-400 focus:border-[#3b82f6] focus:ring-0"
+                                    className="border-0 border-b-2 border-slate-300 bg-transparent px-2 py-3 text-slate-900 placeholder:text-slate-400 focus:border-[#3b82f6] focus:ring-0"
                                 />
                                 <InputError message={errors.email} />
                             </div>
@@ -61,7 +61,7 @@ export default function Login({
                                     tabIndex={2}
                                     autoComplete="current-password"
                                     placeholder="Password"
-                                    className="border-0 border-b-2 border-slate-300 bg-transparent px-0 py-3 text-slate-900 placeholder:text-slate-400 focus:border-[#3b82f6] focus:ring-0"
+                                    className="border-0 border-b-2 border-slate-300 bg-transparent px-2 py-3 text-slate-900 placeholder:text-slate-400 focus:border-[#3b82f6] focus:ring-0"
                                 />
                                 <InputError message={errors.password} />
                             </div>

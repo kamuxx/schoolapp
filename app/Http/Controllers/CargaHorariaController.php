@@ -3,36 +3,54 @@
 namespace App\Http\Controllers;
 
 use App\Models\CourseSubjectTeacher;
-use App\Models\CourseSubjectTeacherSchedule;
 use App\Models\Employee;
 use App\Models\ScheduleBlock;
 use App\Models\Section;
 use App\Models\Subject;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class CargaHorariaController extends Controller
 {
     /**
-     * Obtiene los datos necesarios para la gestión de carga horaria de un docente.
+     * Muestra la vista detallada de la carga horaria del docente.
      */
-    public function getTeacherAssignments(int $employeeId)
+    public function showTeacherWorkload(int $employeeId)
     {
         $employee = Employee::with('user')->findOrFail($employeeId);
         $schoolId = $employee->school_id;
 
         // Asignaciones actuales del docente
-        $assignments = CourseSubjectTeacher::where('teacher_id', $employee->user_id)
-            ->with(['subject', 'section.level', 'schedules.scheduleBlock'])
-            ->get();
+        $assignments = CourseSubjectTeacher::where('teacher_id', $employee->user->id)
+            ->with(['subject', 'section.schoolLevel.level', 'schedules.scheduleBlock'])
+            ->get()
+            ->map(function ($a) {
+                // Preservar contrato con el frontend
+                if ($a->section && $a->section->schoolLevel) {
+                    $a->section->setRelation('level', $a->section->schoolLevel->level);
+                    // Añadir conteo de estudiantes
+                    $a->section->students_count = $a->section->getActiveEnrollments()->count();
+                    $a->section->unsetRelation('schoolLevel');
+                }
+
+                return $a;
+            });
 
         // Datos para los selectores
-        $sections = Section::with('level')->where('school_id', $schoolId)->get();
+        $sections = Section::with('schoolLevel.level')->where('school_id', $schoolId)->get()
+            ->map(function ($s) {
+                if ($s->schoolLevel) {
+                    $s->setRelation('level', $s->schoolLevel->level);
+                    $s->unsetRelation('schoolLevel');
+                }
+
+                return $s;
+            });
         $subjects = Subject::where('school_id', $schoolId)->get();
         $blocks = ScheduleBlock::where('school_id', $schoolId)->orderBy('sort_order')->get();
 
-        return response()->json([
+        return Inertia::render('filiacion/carga-horaria/show', [
             'employee' => $employee,
             'assignments' => $assignments,
             'sections' => $sections,
@@ -71,7 +89,7 @@ class CargaHorariaController extends Controller
                 ]
             );
 
-            if (!$assignment->wasRecentlyCreated) {
+            if (! $assignment->wasRecentlyCreated) {
                 // Si ya existía, limpiamos el horario previo para sobrescribir
                 $assignment->schedules()->delete();
             } else {
@@ -80,7 +98,7 @@ class CargaHorariaController extends Controller
             }
 
             // 2. Guardar el nuevo horario
-            if (!empty($validated['schedules'])) {
+            if (! empty($validated['schedules'])) {
                 foreach ($validated['schedules'] as $sched) {
                     $assignment->schedules()->create([
                         'school_id' => $schoolId,
@@ -91,9 +109,15 @@ class CargaHorariaController extends Controller
                 }
             }
 
+            $assignment->load(['subject', 'section.schoolLevel.level', 'schedules.scheduleBlock']);
+            if ($assignment->section && $assignment->section->schoolLevel) {
+                $assignment->section->setRelation('level', $assignment->section->schoolLevel->level);
+                $assignment->section->unsetRelation('schoolLevel');
+            }
+
             return response()->json([
                 'message' => 'Carga horaria guardada correctamente',
-                'assignment' => $assignment->load(['subject', 'section.level', 'schedules.scheduleBlock']),
+                'assignment' => $assignment,
             ]);
         });
     }
@@ -118,13 +142,13 @@ class CargaHorariaController extends Controller
                     'name' => $sl->level->name,
                     'stage' => $sl->level->stage,
                     'school_level_id' => $sl->id,
-                    'sections' => $sl->sections->map(fn($s) => [
+                    'sections' => $sl->sections->map(fn ($s) => [
                         'id' => $s->id,
-                        'name' => $s->name
-                    ])
+                        'name' => $s->name,
+                    ]),
                 ];
             })
-            ->filter(function($l) use ($educationalStages) {
+            ->filter(function ($l) use ($educationalStages) {
                 // Solo incluir niveles que pertenezcan a las etapas configuradas de la escuela
                 return in_array($l['stage'], $educationalStages);
             })
@@ -138,7 +162,7 @@ class CargaHorariaController extends Controller
             ->groupBy('school_level_id');
 
         // 3. Asignaciones actuales del docente
-        $currentAssignments = CourseSubjectTeacher::where('teacher_id', $employee->user_id)
+        $currentAssignments = CourseSubjectTeacher::where('teacher_id', $employee->user->id)
             ->where('school_id', $schoolId)
             ->get(['id', 'subject_id', 'section_id']);
 
@@ -169,7 +193,7 @@ class CargaHorariaController extends Controller
 
             // 1. Obtener IDs de las asignaciones enviadas para identificar qué mantener/crear
             $newAssignments = collect($validated['assignments']);
-            
+
             // 2. Eliminar (soft delete) asignaciones que NO están en la nueva lista
             // Solo para este docente y esta escuela
             $currentIds = CourseSubjectTeacher::where('teacher_id', $teacherId)
@@ -181,7 +205,7 @@ class CargaHorariaController extends Controller
                     return $item['subject_id'] == $current->subject_id && $item['section_id'] == $current->section_id;
                 });
 
-                if (!$exists) {
+                if (! $exists) {
                     $current->delete(); // Soft delete
                 }
             }

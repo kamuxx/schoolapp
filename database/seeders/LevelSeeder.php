@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\AcademicYear;
 use App\Models\Level;
 use App\Models\School;
-use App\Models\AcademicYear;
 use Illuminate\Database\Seeder;
 
 // use App\Models\EducationalStage;
@@ -22,24 +22,23 @@ class LevelSeeder extends Seeder
         $school = School::firstOrCreate(
             ['slug' => 'default-school'],
             [
-                'name'            => 'Colegio Principal',
-                'country'         => 'Bolivia',
+                'name' => 'Colegio Principal',
+                'country' => 'Bolivia',
                 'academic_system' => 'trimestral',
                 'educational_stages' => ['secundaria'],
-                'is_active'       => true,
-                'max_capacity'    => 480,
-                'created_by'      => 1,
+                'is_active' => true,
+                'max_capacity' => 480,
             ]
         );
 
         // 2. Asegurar que existe un Año Académico vigente
         $academicYear = AcademicYear::firstOrCreate(
             [
-                'name'      => date('Y'),
+                'name' => date('Y'),
                 'school_id' => $school->id,
             ],
             [
-                'is_active'  => true,
+                'is_active' => true,
             ]
         );
 
@@ -47,7 +46,7 @@ class LevelSeeder extends Seeder
             // Inicial
             ['name' => '1ra Sección Inicial', 'slug' => '1ra-seccion-inicial', 'stage' => 'inicial', 'order' => 10],
             ['name' => '2da Sección Inicial', 'slug' => '2da-seccion-inicial', 'stage' => 'inicial', 'order' => 20],
-            
+
             // Primaria
             ['name' => '1ro Primaria', 'slug' => '1ro-primaria', 'stage' => 'primaria', 'order' => 110],
             ['name' => '2do Primaria', 'slug' => '2do-primaria', 'stage' => 'primaria', 'order' => 120],
@@ -55,7 +54,7 @@ class LevelSeeder extends Seeder
             ['name' => '4to Primaria', 'slug' => '4to-primaria', 'stage' => 'primaria', 'order' => 140],
             ['name' => '5to Primaria', 'slug' => '5to-primaria', 'stage' => 'primaria', 'order' => 150],
             ['name' => '6to Primaria', 'slug' => '6to-primaria', 'stage' => 'primaria', 'order' => 160],
-            
+
             // Secundaria
             ['name' => '1ro Secundaria', 'slug' => '1ro-secundaria', 'stage' => 'secundaria', 'order' => 210],
             ['name' => '2do Secundaria', 'slug' => '2do-secundaria', 'stage' => 'secundaria', 'order' => 220],

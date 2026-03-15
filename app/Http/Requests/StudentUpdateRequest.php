@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Student;
+use Illuminate\Foundation\Http\FormRequest;
 
 class StudentUpdateRequest extends FormRequest
 {
@@ -16,12 +16,12 @@ class StudentUpdateRequest extends FormRequest
     {
         $studentId = $this->route('id');
         $student = Student::findOrFail($studentId);
-        
+
         return [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $student->user_id,
-            'student_code' => 'required|string|unique:students,student_code,' . $studentId,
+            'condition' => 'required|in:nuevo,repitiente',
+            'student_code' => 'required|string|unique:students,student_code,'.$studentId,
             'birth_date' => 'nullable|date',
             'national_id_type' => 'nullable|string',
             'national_id_number' => 'nullable|string',
@@ -42,8 +42,8 @@ class StudentUpdateRequest extends FormRequest
         return [
             'first_name.required' => 'El nombre es obligatorio.',
             'last_name.required' => 'El apellido es obligatorio.',
-            'email.required' => 'El correo es obligatorio.',
-            'email.unique' => 'Este correo ya está en uso.',
+            'condition.required' => 'La condición del estudiante es obligatoria.',
+            'condition.in' => 'La condición debe ser: nuevo o repitiente.',
             'student_code.required' => 'El código RUDE es obligatorio.',
             'student_code.unique' => 'Este código ya está asignado.',
             'gender.required' => 'El género es obligatorio.',

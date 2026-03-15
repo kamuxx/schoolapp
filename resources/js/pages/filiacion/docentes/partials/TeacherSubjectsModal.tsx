@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { 
     BookOpenIcon, 
     ChevronDownIcon,
@@ -95,9 +96,9 @@ export function TeacherSubjectsModal({ open, onOpenChange, employeeId, teacherNa
     const fetchCatalog = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`/filiacion/carga-horaria/docente/${employeeId}/catalog`);
-            if (response.ok) {
-                const data = await response.json();
+            const response = await axios.get(`/filiacion/carga-horaria/docente/${employeeId}/catalog`);
+            if (response.status === 200) {
+                const data = response.data;
                 setStages(data.stages || []);
                 setLevels(data.levels || []);
                 setSubjectsByLevel(data.subjects_by_level || {});
@@ -185,26 +186,17 @@ export function TeacherSubjectsModal({ open, onOpenChange, employeeId, teacherNa
         
         setSaving(true);
         try {
-            const response = await fetch('/filiacion/carga-horaria/sync', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
-                },
-                body: JSON.stringify({
-                    employee_id: employeeId,
-                    assignments: selectedAssignments
-                })
+            const response = await axios.post('/filiacion/carga-horaria/sync', {
+                employee_id: employeeId,
+                assignments: selectedAssignments
             });
 
-            if (response.ok) {
+            if (response.status === 200 || response.status === 201) {
                 toast.success('Asignaciones actualizadas correctamente');
                 onOpenChange(false);
-            } else {
-                toast.error('Error al guardar las asignaciones');
             }
-        } catch (error) {
-            toast.error('Error de red al guardar');
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Error de red al guardar');
         } finally {
             setSaving(false);
         }

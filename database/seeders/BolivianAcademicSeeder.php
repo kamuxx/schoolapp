@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\School;
 use App\Models\AcademicYear;
 use App\Models\Level;
+use App\Models\School;
+use App\Models\SchoolLevel;
 use App\Models\Subject;
 use App\Models\User;
-use App\Models\SchoolLevel;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class BolivianAcademicSeeder extends Seeder
@@ -29,12 +29,13 @@ class BolivianAcademicSeeder extends Seeder
                 'city' => 'Cochabamba',
                 'is_active' => true,
                 'max_capacity' => 480,
-                'created_by' => 1,
             ]
         );
-        if (!$school) return;
+        if (! $school) {
+            return;
+        }
 
-        User::where('is_active', 1)->update(["school_id" => $school->id]);
+        User::where('is_active', 1)->update(['school_id' => $school->id]);
 
         // 2. Obtener o crear el Año Académico
         $academicYear = AcademicYear::firstOrCreate(
@@ -72,7 +73,7 @@ class BolivianAcademicSeeder extends Seeder
                 ['name' => 'Técnica Tecnológica General / Especializada', 'short_name' => 'T.T.'],
                 ['name' => 'Valores, Espiritualidad y Religiones', 'short_name' => 'RELIGIÓN'],
                 ['name' => 'Lengua Extranjera (Inglés)', 'short_name' => 'INGLÉS'],
-            ]
+            ],
         ];
 
         // 4. Vincular niveles del catálogo a la escuela (SchoolLevel)

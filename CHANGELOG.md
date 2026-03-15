@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+- Error 404 en ruta `/filiacion/carga-horaria/docente/{id}/data` mediante normalización de rutas a español y actualización de endpoint en frontend.
+- Error de validación en `GetTeacherAssignmentsRequest` al vincular correctamente el parámetro de ruta `employeeId`.
+- `TypeError` en `GetTeacherAssignmentsUseCase` corrigiendo el acceso al ID del usuario a través de la relación del modelo `Employee`.
+
 ### Added
 - README.md profesional con stack completo, arquitectura, entidades de dominio, roles, comandos de desarrollo y matriz de tests críticos.
 - CHANGELOG.md inicial del proyecto.

@@ -1,5 +1,5 @@
 import { AlertCircle, Upload } from 'lucide-react';
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
@@ -26,6 +26,7 @@ type FormFieldType =
     | 'date'
     | 'tel'
     | 'url'
+    | 'radio'
     | 'file';
 
 export interface Option {
@@ -41,8 +42,8 @@ export interface FormFieldProps extends Omit<
     name: string;
     type?: FormFieldType;
     error?: string;
-    options?: Option[]; // Para selects
-    onValueChange?: (value: string) => void; // Para select
+    options?: Option[]; // Para selects o radios
+    onValueChange?: (value: string) => void; // Para select/radio
     description?: string | ReactNode;
     containerClassName?: string;
     required?: boolean;
@@ -65,6 +66,10 @@ export function FormField({
     required,
     ...props
 }: FormFieldProps) {
+    // Hooks for file type (must be at top level to respect Rules of Hooks)
+    const [fileName, setFileName] = useState<string>('');
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     // Generar el input correcto según el tipo
     const renderField = () => {
         if (type === 'textarea') {
@@ -124,10 +129,38 @@ export function FormField({
             );
         }
 
-        if (type === 'file') {
-            const [fileName, setFileName] = useState<string>('');
-            const fileInputRef = useRef<HTMLInputElement>(null);
+        if (type === 'radio') {
+            return (
+                <div className="flex flex-wrap gap-4 pt-2">
+                    {options.map((opt) => (
+                        <label key={String(opt.value)} className="flex items-center gap-2 cursor-pointer group">
+                            <input
+                                type="radio"
+                                name={name}
+                                value={String(opt.value)}
+                                checked={value !== undefined ? String(value) === String(opt.value) : undefined}
+                                onChange={(e) => {
+                                    if (onValueChange) onValueChange(e.target.value);
+                                    if (onChange) onChange(e as any);
+                                }}
+                                disabled={props.disabled}
+                                className={cn(
+                                    "h-4 w-4 text-indigo-600 border-zinc-300 focus:ring-indigo-600",
+                                    error && "border-destructive text-destructive focus:ring-destructive",
+                                    className
+                                )}
+                                required={required}
+                            />
+                            <span className="text-sm font-medium text-zinc-700 group-hover:text-zinc-900 transition-colors">
+                                {opt.label}
+                            </span>
+                        </label>
+                    ))}
+                </div>
+            );
+        }
 
+        if (type === 'file') {
             const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                 const file = e.target.files?.[0];
                 if (file) {

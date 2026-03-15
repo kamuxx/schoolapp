@@ -11,6 +11,15 @@ class SchoolRepository extends BaseRepository
         parent::__construct($model);
     }
 
+    public function first(array $filters = []): ?School
+    {
+        if (! empty($filters)) {
+            return $this->model->searchSchool($filters, 1, 0)->first();
+        }
+
+        return $this->model->first();
+    }
+
     public function find($id)
     {
         return $this->model->find($id);

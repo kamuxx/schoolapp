@@ -30,7 +30,7 @@ class StudentRepository extends BaseRepository
             return $item;
         }
 
-return null;
+        return null;
     }
 
     public function delete($id)
@@ -42,7 +42,14 @@ return null;
 
     public function search(array $filters = [], ?int $limit = 10, ?int $offset = 0): array
     {
-        $query = $this->model->with(['user', 'mainGuardian'])->searchStudent($filters, null, null);
+        $query = $this->model->with([
+            'user',
+            'mainGuardian',
+            'enrollments',
+            'enrollments.section',
+            'enrollments.section.schoolLevel',
+            'enrollments.section.schoolLevel.level',
+        ])->searchStudent($filters, null, null);
 
         $totalRecords = $query->count();
         $currentPage = $limit > 0 ? ($offset / $limit) + 1 : 1;

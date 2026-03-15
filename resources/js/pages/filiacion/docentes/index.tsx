@@ -1,5 +1,5 @@
-import { Head } from '@inertiajs/react';
-import { router, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
+import axios from 'axios';
 import type { ColumnDef } from '@tanstack/react-table';
 import {
     PencilIcon,
@@ -225,9 +225,9 @@ export default function Employees({ employees }: Props) {
     const fetchCargaHoraria = async (employeeId: number) => {
         setLoadingCarga(true);
         try {
-            const response = await fetch(`/filiacion/carga-horaria/docente/${employeeId}`);
-            if (response.ok) {
-                const data = await response.json();
+            const response = await axios.get(`/filiacion/carga-horaria/docente/${employeeId}/assignments`);
+            if (response.status === 200) {
+                const data = response.data;
                 setCargaData(data);
             }
         } catch (error) {
@@ -244,48 +244,33 @@ export default function Employees({ employees }: Props) {
         }
 
         try {
-            const response = await fetch('/filiacion/carga-horaria/asignar', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
-                },
-                body: JSON.stringify({
-                    teacher_id: selected.user?.id,
-                    subject_id: newAssignment.subject_id,
-                    section_id: newAssignment.section_id,
-                    schedules: newAssignment.schedules,
-                }),
+            const response = await axios.post('/filiacion/carga-horaria/asignar', {
+                teacher_id: selected.user?.id,
+                subject_id: newAssignment.subject_id,
+                section_id: newAssignment.section_id,
+                schedules: newAssignment.schedules,
             });
 
-            if (response.ok) {
+            if (response.status === 200 || response.status === 201) {
                 toast.success('Asignación guardada');
                 fetchCargaHoraria(selected.id);
                 setNewAssignment({ subject_id: '', section_id: '', schedules: [] });
-            } else {
-                const errorData = await response.json();
-                toast.error(errorData.message || 'Error al guardar asignación');
             }
-        } catch (error) {
-            toast.error('Error de red al asignar');
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Error de red al asignar');
         }
     };
 
     const handleDeleteAssignment = async (assignmentId: number) => {
         try {
-            const response = await fetch(`/filiacion/carga-horaria/eliminar/${assignmentId}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
-                },
-            });
+            const response = await axios.delete(`/filiacion/carga-horaria/eliminar/${assignmentId}`);
 
-            if (response.ok) {
+            if (response.status === 200 || response.status === 204) {
                 toast.success('Asignación eliminada');
                 if (selected) fetchCargaHoraria(selected.id);
             }
-        } catch (error) {
-            toast.error('Error al eliminar asignación');
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Error al eliminar asignación');
         }
     };
 
@@ -1410,11 +1395,11 @@ export default function Employees({ employees }: Props) {
                                                     )}
                                                 </TabsContent>
 
-                                                {cargaData?.assignments.length > 0 && (
+                                                {cargaData && cargaData.assignments && cargaData.assignments.length > 0 && (
                                                     <TabsContent value="carga" className="mt-0 focus-visible:ring-0">
                                                         <div className="space-y-6">
                                                             {daysOfWeek.map(day => {
-                                                                const daySchedules = cargaData?.assignments.flatMap(a => 
+                                                                const daySchedules = cargaData?.assignments?.flatMap(a => 
                                                                     a.schedules.filter(s => s.day_of_week === day.id).map(s => ({...s, subject: a.subject}))
                                                                 ).sort((a,b) => a.schedule_block.start_time.localeCompare(b.schedule_block.start_time));
 

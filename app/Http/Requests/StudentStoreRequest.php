@@ -16,7 +16,7 @@ class StudentStoreRequest extends FormRequest
         return [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:users,email',
+            'condition' => 'required|in:nuevo,repitiente',
             'student_code' => 'required|string|unique:students,student_code',
             'birth_date' => 'nullable|date',
             'national_id_type' => 'nullable|string',
@@ -29,6 +29,7 @@ class StudentStoreRequest extends FormRequest
             'guardian_name' => 'required|string',
             'guardian_phone' => 'required|string',
             'guardian_relationship' => 'required|string|in:Padre,Madre,Tutor,Otro',
+            'school_level_id' => 'required|exists:school_levels,id',
             'is_active' => 'boolean',
         ];
     }
@@ -38,7 +39,8 @@ class StudentStoreRequest extends FormRequest
         return [
             'first_name.required' => 'El nombre es obligatorio.',
             'last_name.required' => 'El apellido es obligatorio.',
-            'email.unique' => 'Este correo ya está registrado.',
+            'condition.required' => 'La condición del estudiante es obligatoria.',
+            'condition.in' => 'La condición debe ser: nuevo o repitiente.',
             'student_code.required' => 'El código RUDE es obligatorio.',
             'student_code.unique' => 'Este código ya está asignado.',
             'gender.required' => 'El género es obligatorio.',

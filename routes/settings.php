@@ -1,23 +1,22 @@
 <?php
 
+use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\CargaHorariaController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\GradeController;
+use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProfileController as InstitutionalProfileController;
 use App\Http\Controllers\RoleController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\SchoolController;
-use App\Http\Controllers\AcademicYearController;
-use App\Http\Controllers\SubjectController;
-use App\Http\Controllers\EmployeeController;
-use App\Http\Controllers\StudentController;
-use App\Http\Controllers\AttendanceController;
-use App\Http\Controllers\GradeController;
-use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController as SettingsProfileController;
 use App\Http\Controllers\Settings\TwoFactorAuthenticationController;
-use App\Http\Controllers\CargaHorariaController;
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
-
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', '/settings/profile');
@@ -39,9 +38,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('materias', [SubjectController::class, 'store'])->name('subjects.store');
         Route::patch('materias/{id}', [SubjectController::class, 'update'])->name('subjects.update');
         Route::delete('materias/{id}', [SubjectController::class, 'destroy'])->name('subjects.destroy');
-        
+
         // Perfil Escolar
-        
+
         // Niveles y Paralelos
         Route::get('niveles', [\App\Http\Controllers\LevelController::class, 'index'])->name('levels.index');
         Route::get('niveles/{id}', [\App\Http\Controllers\LevelController::class, 'show'])->name('levels.show');
@@ -63,10 +62,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('estudiantes/{id}', [StudentController::class, 'destroy'])->name('students.destroy');
 
         // Carga Horaria
-        Route::get('carga-horaria/docente/{employeeId}', [CargaHorariaController::class, 'getTeacherAssignments'])->name('carga-horaria.teacher');
+        Route::get('carga-horaria/docente/{employeeId}', [CargaHorariaController::class, 'showTeacherWorkload'])->name('carga-horaria.teacher.show');
+        Route::get('carga-horaria/docente/{employeeId}/assignments', \App\Http\Controllers\CargaHoraria\GetTeacherAssignmentsController::class)
+            ->name('carga-horaria.docente.assignments');
         Route::get('carga-horaria/docente/{employeeId}/catalog', [CargaHorariaController::class, 'getCatalogForTeacher'])->name('carga-horaria.catalog');
         Route::post('carga-horaria/asignar', [CargaHorariaController::class, 'storeAssignment'])->name('carga-horaria.store');
-        Route::post('carga-horaria/sync', [CargaHorariaController::class, 'syncTeacherAssignments'])->name('carga-horaria.sync');
+        Route::post('carga-horaria/sync', \App\Http\Controllers\CargaHoraria\SyncTeacherAssignmentsController::class)->name('carga-horaria.sync');
         Route::delete('carga-horaria/eliminar/{id}', [CargaHorariaController::class, 'destroyAssignment'])->name('carga-horaria.destroy');
 
         // Evaluaciones Dimensionales - pendiente desarrollo

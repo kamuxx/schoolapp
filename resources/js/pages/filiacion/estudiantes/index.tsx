@@ -44,12 +44,28 @@ interface Guardian {
     relationship: string;
 }
 
+interface Enrollment {
+    id: number;
+    status: string;
+    section?: {
+        id: number;
+        name: string;
+        school_level?: {
+            id: number;
+            level?: {
+                id: number;
+                name: string;
+            }
+        }
+    }
+}
+
 interface Student {
     id: number;
     first_name: string;
     last_name: string;
-    email: string;
     student_code: string;
+    condition?: string;
     national_id_type?: string;
     birth_date?: string;
     national_id_number?: string;
@@ -62,7 +78,9 @@ interface Student {
     guardian_phone?: string;
     guardian_relationship?: string;
     is_active: boolean;
+    school_level_id?: number;
     main_guardian?: Guardian;
+    enrollments?: Enrollment[];
     user?: {
         id: number;
         email: string;
@@ -81,6 +99,7 @@ type Responselist = {
 
 interface Props {
     students: Responselist;
+    school_levels: { id: number; name: string }[];
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -95,7 +114,7 @@ type ToolButtonOptions = {
     onClick: () => void;
 };
 
-export default function Students({ students }: Props) {
+export default function Students({ students, school_levels = [] }: Props) {
     const [studentsState, setStudentsState] = useState<Student[]>(
         students.data,
     );
@@ -129,10 +148,11 @@ export default function Students({ students }: Props) {
     } = useForm({
         first_name: '',
         last_name: '',
-        email: '',
         student_code: '',
+        condition: 'nuevo',
         birth_date: '',
         national_id_number: '',
+        national_id_type: 'CI',
         blood_type: '',
         address: '',
         city: '',
@@ -142,16 +162,20 @@ export default function Students({ students }: Props) {
         guardian_name: '',
         guardian_phone: '',
         guardian_relationship: '',
+        school_level_id: '',
         is_active: true,
     });
+
+    const [currentStep, setCurrentStep] = useState(1);
+    const totalSteps = 4;
 
     useEffect(() => {
         if (selected) {
             setData({
                 first_name: selected.first_name,
                 last_name: selected.last_name,
-                email: selected.user?.email || '',
                 student_code: selected.student_code,
+                condition: selected.condition || 'nuevo',
                 birth_date: selected.birth_date || '',
                 national_id_number: selected.national_id_number || '',
                 blood_type: selected.blood_type || '',
@@ -173,10 +197,12 @@ export default function Students({ students }: Props) {
                     selected.main_guardian?.relationship ||
                     selected.guardian_relationship ||
                     '',
+                school_level_id: selected.school_level_id?.toString() || '',
                 is_active: selected.is_active,
             });
         } else {
             reset();
+            setCurrentStep(1);
         }
         clearErrors();
     }, [selected]);
@@ -351,11 +377,10 @@ export default function Students({ students }: Props) {
                 const isActive = row.getValue('is_active') as boolean;
                 return (
                     <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium shadow-sm ring-1 ring-inset ${
-                            isActive
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium shadow-sm ring-1 ring-inset ${isActive
                                 ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
                                 : 'bg-zinc-50 text-zinc-700 ring-zinc-600/20'
-                        }`}
+                            }`}
                     >
                         <span
                             className={`mr-1.5 h-1.5 w-1.5 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-zinc-400'}`}
@@ -458,6 +483,7 @@ export default function Students({ students }: Props) {
     };
 
     const handleSelect = (student: Student) => {
+        console.log({student},student.enrollments?.find(e=>e.status==='active')?.section?.school_level);
         setSelected(student);
     };
 
@@ -465,8 +491,8 @@ export default function Students({ students }: Props) {
         if (
             !data.first_name ||
             !data.last_name ||
-            !data.email ||
             !data.student_code ||
+            !data.condition ||
             !data.gender
         ) {
             toast.error('Por favor complete todos los campos obligatorios (*)');
@@ -532,7 +558,7 @@ export default function Students({ students }: Props) {
                         if (!o) setSelected(null);
                     }}
                 >
-                    <DialogContent className="max-w-2xl">
+                    <DialogContent className="w-full lg:max-w-3xl">
                         <DialogHeader>
                             <DialogTitle>Ficha de Inscripción</DialogTitle>
                             <DialogDescription>
@@ -541,290 +567,305 @@ export default function Students({ students }: Props) {
                             </DialogDescription>
                         </DialogHeader>
 
-                        <Tabs defaultValue="general" className="w-full">
-                            <TabsList className="grid w-full grid-cols-3">
-                                <TabsTrigger value="general">
-                                    General
-                                </TabsTrigger>
-                                <TabsTrigger value="location">
-                                    Ubicación
-                                </TabsTrigger>
-                                <TabsTrigger value="guardian">
-                                    Representante
-                                </TabsTrigger>
-                            </TabsList>
+                        <div className="mb-6">
+                            <div className="flex items-center justify-between px-2">
+                                {[1, 2, 3, 4].map((step) => (
+                                    <div key={step} className="flex items-center">
+                                        <div
+                                            className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold transition-all duration-300 ${currentStep === step
+                                                    ? 'border-indigo-600 bg-indigo-600 text-white shadow-md'
+                                                    : currentStep > step
+                                                        ? 'border-indigo-600 bg-indigo-100 text-indigo-600'
+                                                        : 'border-muted bg-background text-muted-foreground'
+                                                }`}
+                                        >
+                                            {step}
+                                        </div>
+                                        {step < 4 && (
+                                            <div
+                                                className={`mx-2 h-0.5 w-8 sm:w-16 transition-all duration-500 ${currentStep > step ? 'bg-indigo-600' : 'bg-muted'
+                                                    }`}
+                                            />
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="mt-2 flex justify-between px-1 text-[10px] font-medium text-muted-foreground uppercase tracking-tighter">
+                                <span className={currentStep === 1 ? 'text-indigo-600 font-bold' : ''}>Filiación</span>
+                                <span className={currentStep === 2 ? 'text-indigo-600 font-bold' : ''}>Académico</span>
+                                <span className={currentStep === 3 ? 'text-indigo-600 font-bold' : ''}>Ubicación</span>
+                                <span className={currentStep === 4 ? 'text-indigo-600 font-bold' : ''}>Representante</span>
+                            </div>
+                        </div>
 
-                            <TabsContent
-                                value="general"
-                                className="space-y-4 py-4"
-                            >
-                                <div className="grid grid-cols-2 gap-4">
-                                    <FormField
-                                        name="first_name"
-                                        label="Nombres"
-                                        value={data.first_name}
-                                        onChange={(e) =>
-                                            setData(
-                                                'first_name',
-                                                e.target.value,
-                                            )
-                                        }
-                                        error={errors.first_name}
-                                        required
-                                    />
-                                    <FormField
-                                        name="last_name"
-                                        label="Apellidos"
-                                        value={data.last_name}
-                                        onChange={(e) =>
-                                            setData('last_name', e.target.value)
-                                        }
-                                        error={errors.last_name}
-                                        required
-                                    />
+                        <div className="min-h-[350px] py-2">
+                            {currentStep === 1 && (
+                                <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <FormField
+                                            name="first_name"
+                                            label="Nombres"
+                                            value={data.first_name}
+                                            onChange={(e) => setData('first_name', e.target.value)}
+                                            error={errors.first_name}
+                                            required
+                                        />
+                                        <FormField
+                                            name="last_name"
+                                            label="Apellidos"
+                                            value={data.last_name}
+                                            onChange={(e) => setData('last_name', e.target.value)}
+                                            error={errors.last_name}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <FormField
+                                            name="condition"
+                                            label="Condición del Estudiante"
+                                            type="radio"
+                                            value={data.condition}
+                                            onValueChange={(v) => setData('condition', v)}
+                                            options={[
+                                                { label: 'Nuevo', value: 'nuevo' },
+                                                { label: 'Repitiente', value: 'repitiente' },
+                                            ]}
+                                            error={errors.condition}
+                                            required
+                                        />
+                                        <FormField
+                                            name="student_code"
+                                            label="Código (RUDE)"
+                                            value={data.student_code}
+                                            onChange={(e) => setData('student_code', e.target.value)}
+                                            error={errors.student_code}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <FormField
+                                            name="gender"
+                                            label="Género"
+                                            type="radio"
+                                            value={data.gender}
+                                            onValueChange={(v) => setData('gender', v)}
+                                            options={[
+                                                { label: 'Masculino', value: 'Masculino' },
+                                                { label: 'Femenino', value: 'Femenino' },
+                                                { label: 'Otro', value: 'Otro' },
+                                            ]}
+                                            error={errors.gender}
+                                            required
+                                        />
+                                        <FormField
+                                            name="photo"
+                                            label="Foto del Estudiante"
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e: any) => {
+                                                const file = e.target.files?.[0];
+                                                if (file && file.size > 2 * 1024 * 1024) {
+                                                    toast.error('La foto no debe pesar más de 2MB');
+                                                    e.target.value = '';
+                                                    return;
+                                                }
+                                                setData('photo', file || null);
+                                            }}
+                                            error={errors.photo}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                            )}
+
+                            {currentStep === 2 && (
+                                <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                                    <h4 className="text-sm font-medium text-muted-foreground mb-4">Información Académica</h4>
                                     <FormField
-                                        name="email"
-                                        label="Correo Electrónico"
-                                        type="email"
-                                        value={data.email}
-                                        onChange={(e) =>
-                                            setData('email', e.target.value)
-                                        }
-                                        error={errors.email}
-                                        required
-                                    />
-                                    <FormField
-                                        name="student_code"
-                                        label="Código (RUDE)"
-                                        value={data.student_code}
-                                        onChange={(e) =>
-                                            setData(
-                                                'student_code',
-                                                e.target.value,
-                                            )
-                                        }
-                                        error={errors.student_code}
-                                        required
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <FormField
-                                        name="national_id_number"
-                                        label="Nro. Documento (CI)"
-                                        value={data.national_id_number}
-                                        onChange={(e) =>
-                                            setData(
-                                                'national_id_number',
-                                                e.target.value,
-                                            )
-                                        }
-                                        error={errors.national_id_number}
-                                    />
-                                    <FormField
-                                        name="birth_date"
-                                        label="Fecha de Nacimiento"
-                                        type="date"
-                                        value={data.birth_date}
-                                        onChange={(e) =>
-                                            setData(
-                                                'birth_date',
-                                                e.target.value,
-                                            )
-                                        }
-                                        error={errors.birth_date}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <FormField
-                                        name="gender"
-                                        label="Género"
+                                        name="school_level_id"
+                                        label="Grado / Nivel de Inscripción"
                                         type="select"
-                                        value={data.gender}
-                                        onValueChange={(v) =>
-                                            setData('gender', v)
-                                        }
-                                        options={[
-                                            {
-                                                label: 'Masculino',
-                                                value: 'Masculino',
-                                            },
-                                            {
-                                                label: 'Femenino',
-                                                value: 'Femenino',
-                                            },
-                                            { label: 'Otro', value: 'Otro' },
-                                        ]}
-                                        error={errors.gender}
+                                        value={data.school_level_id}
+                                        onValueChange={(v) => setData('school_level_id', v)}
+                                        options={school_levels.map(sl => ({
+                                            label: sl.name,
+                                            value: sl.id.toString()
+                                        }))}
+                                        error={errors.school_level_id}
                                         required
+                                        description="Seleccione el grado donde el estudiante será asignado automáticamente."
                                     />
+                                    <div className="rounded-lg bg-blue-50 p-4 border border-blue-100 flex gap-3 mt-6">
+                                        <Icon iconNode={AlertCircle} className="h-5 w-5 text-blue-500 shrink-0" />
+                                        <div className="text-xs text-blue-800 leading-relaxed font-medium">
+                                            <strong>Nota:</strong> El sistema asignará automáticamente el paralelo (sección) basándose en la capacidad disponible (máx. 40 estudiantes). Si los paralelos actuales están llenos, se creará uno nuevo.
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {currentStep === 3 && (
+                                <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <FormField
+                                            name="national_id_number"
+                                            label="Nro. Documento (CI)"
+                                            value={data.national_id_number}
+                                            onChange={(e) => setData('national_id_number', e.target.value)}
+                                            error={errors.national_id_number}
+                                        />
+                                        <FormField
+                                            name="birth_date"
+                                            label="Fecha de Nacimiento"
+                                            type="date"
+                                            value={data.birth_date}
+                                            onChange={(e) => setData('birth_date', e.target.value)}
+                                            error={errors.birth_date}
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <FormField
+                                            name="city"
+                                            label="Ciudad"
+                                            value={data.city}
+                                            onChange={(e) => setData('city', e.target.value)}
+                                            error={errors.city}
+                                        />
+                                        <FormField
+                                            name="blood_type"
+                                            label="Tipo de Sangre"
+                                            value={data.blood_type}
+                                            onChange={(e) => setData('blood_type', e.target.value)}
+                                            error={errors.blood_type}
+                                        />
+                                    </div>
                                     <FormField
-                                        name="blood_type"
-                                        label="Tipo de Sangre"
-                                        value={data.blood_type}
-                                        onChange={(e) =>
-                                            setData(
-                                                'blood_type',
-                                                e.target.value,
-                                            )
-                                        }
-                                        error={errors.blood_type}
+                                        name="address"
+                                        label="Dirección de Domicilio"
+                                        type="textarea"
+                                        value={data.address}
+                                        onChange={(e) => setData('address', e.target.value)}
+                                        error={errors.address}
+                                        className="h-24"
                                     />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                            )}
+
+                            {currentStep === 4 && (
+                                <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
                                     <FormField
-                                        name="photo"
-                                        label="Foto del Estudiante"
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e: any) => {
-                                            const file = e.target.files?.[0];
-                                            if (
-                                                file &&
-                                                file.size > 2 * 1024 * 1024
-                                            ) {
-                                                toast.error(
-                                                    'La foto no debe pesar más de 2MB',
-                                                );
-                                                e.target.value = '';
+                                        name="guardian_name"
+                                        label="Nombre del Representante"
+                                        value={data.guardian_name}
+                                        onChange={(e) => setData('guardian_name', e.target.value)}
+                                        error={errors.guardian_name}
+                                        required
+                                    />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <FormField
+                                            name="guardian_phone"
+                                            label="Teléfono de Contacto"
+                                            type="tel"
+                                            value={data.guardian_phone}
+                                            onChange={(e) => setData('guardian_phone', e.target.value)}
+                                            error={errors.guardian_phone}
+                                            required
+                                        />
+                                        <FormField
+                                            name="guardian_relationship"
+                                            label="Parentesco"
+                                            type="select"
+                                            value={data.guardian_relationship}
+                                            onValueChange={(v) => setData('guardian_relationship', v)}
+                                            options={[
+                                                { label: 'Padre', value: 'Padre' },
+                                                { label: 'Madre', value: 'Madre' },
+                                                { label: 'Tutor Legal', value: 'Tutor' },
+                                                { label: 'Otro', value: 'Otro' },
+                                            ]}
+                                            error={errors.guardian_relationship}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <DialogFooter className="flex-row justify-between sm:justify-between border-t pt-4">
+                            <div className="flex gap-2">
+                                {currentStep > 1 && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setCurrentStep(prev => prev - 1);
+                                        }}
+                                    >
+                                        Anterior
+                                    </Button>
+                                )}
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setOpenModal(false);
+                                        setSelected(null);
+                                        reset();
+                                        setCurrentStep(1);
+                                    }}
+                                >
+                                    Cancelar
+                                </Button>
+                            </div>
+
+                            {currentStep < 4 ? (
+                                <Button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        // Validación básica por paso
+                                        if (currentStep === 1) {
+                                            if (!data.first_name || !data.last_name || !data.condition || !data.student_code || !data.gender) {
+                                                toast.error('Complete los datos obligatorios del estudiante');
                                                 return;
                                             }
-                                            setData('photo', file || null);
-                                        }}
-                                        error={errors.photo}
-                                        description="Seleccione un archivo de imagen"
-                                    />
-                                    {data.photo_path && !data.photo && (
-                                        <div className="mt-2 text-xs text-muted-foreground">
-                                            Ya tiene una foto cargada
-                                        </div>
-                                    )}
-                                </div>
-                            </TabsContent>
-
-                            <TabsContent
-                                value="location"
-                                className="space-y-4 py-4"
-                            >
-                                <FormField
-                                    name="city"
-                                    label="Ciudad"
-                                    value={data.city}
-                                    onChange={(e) =>
-                                        setData('city', e.target.value)
-                                    }
-                                    error={errors.city}
-                                />
-                                <FormField
-                                    name="address"
-                                    label="Dirección de Domicilio"
-                                    type="textarea"
-                                    value={data.address}
-                                    onChange={(e) =>
-                                        setData('address', e.target.value)
-                                    }
-                                    error={errors.address}
-                                />
-                            </TabsContent>
-
-                            <TabsContent
-                                value="guardian"
-                                className="space-y-4 py-4"
-                            >
-                                <FormField
-                                    name="guardian_name"
-                                    label="Nombre del Representante"
-                                    value={data.guardian_name}
-                                    onChange={(e) =>
-                                        setData('guardian_name', e.target.value)
-                                    }
-                                    error={errors.guardian_name}
-                                />
-                                <div className="grid grid-cols-2 gap-4">
-                                    <FormField
-                                        name="guardian_phone"
-                                        label="Teléfono de Contacto"
-                                        type="tel"
-                                        value={data.guardian_phone}
-                                        onChange={(e) =>
-                                            setData(
-                                                'guardian_phone',
-                                                e.target.value,
-                                            )
                                         }
-                                        error={errors.guardian_phone}
-                                    />
-                                    <FormField
-                                        name="guardian_relationship"
-                                        label="Parentesco"
-                                        type="select"
-                                        value={data.guardian_relationship}
-                                        onValueChange={(v) =>
-                                            setData('guardian_relationship', v)
+                                        if (currentStep === 2) {
+                                            if (!data.school_level_id) {
+                                                toast.error('Debe seleccionar un grado para la inscripción');
+                                                return;
+                                            }
                                         }
-                                        options={[
-                                            { label: 'Padre', value: 'Padre' },
-                                            { label: 'Madre', value: 'Madre' },
-                                            {
-                                                label: 'Tutor Legal',
-                                                value: 'Tutor',
-                                            },
-                                            { label: 'Otro', value: 'Otro' },
-                                        ]}
-                                        error={errors.guardian_relationship}
-                                    />
-                                </div>
-                            </TabsContent>
-                        </Tabs>
-
-                        <div className="mt-6 flex flex-col gap-4 border-t pt-5">
-                            {Object.keys(errors).length > 0 && (
-                                <Alert
-                                    variant="destructive"
-                                    className="animate-in border-red-100 bg-red-50/50 py-3 fade-in slide-in-from-top-2"
+                                        setCurrentStep(prev => prev + 1);
+                                    }}
                                 >
-                                    <Icon
-                                        iconNode={AlertCircle}
-                                        className="h-4 w-4"
-                                    />
-                                    <AlertDescription className="text-[0.75rem] font-medium">
-                                        Se encontraron{' '}
-                                        {Object.keys(errors).length} errores de
-                                        validación. Por favor, revise los campos
-                                        resaltados.
+                                    Siguiente
+                                </Button>
+                            ) : (
+                                <Button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        handleSave();
+                                    }}
+                                    disabled={processing}
+                                    className="bg-indigo-600 hover:bg-indigo-700"
+                                >
+                                    {processing ? 'Inscribiendo...' : (selected ? 'Guardar Cambios' : 'Confirmar Inscripción')}
+                                </Button>
+                            )}
+                        </DialogFooter>
+
+                        {Object.keys(errors).length > 0 && (
+                            <div className="mt-2">
+                                <Alert variant="destructive" className="py-2">
+                                    <AlertDescription className="text-xs">
+                                        Hay errores en el formulario. Por favor revise todos los pasos.
                                     </AlertDescription>
                                 </Alert>
-                            )}
-                            {!Object.keys(errors).length && (
-                                <p className="flex items-center px-1 text-[10px] text-muted-foreground">
-                                    <span className="mr-1.5 font-bold text-red-600">
-                                        *
-                                    </span>
-                                    Por favor complete todos los campos
-                                    obligatorios para guardar la ficha.
-                                </p>
-                            )}
-                            <DialogFooter>
-                                <DialogClose asChild>
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => reset()}
-                                    >
-                                        Cancelar
-                                    </Button>
-                                </DialogClose>
-                                <Button
-                                    onClick={handleSave}
-                                    disabled={processing}
-                                    className="bg-zinc-900 px-6 text-white shadow-md transition-all hover:bg-zinc-800 active:scale-95"
-                                >
-                                    {processing
-                                        ? 'Guardando...'
-                                        : 'Guardar Ficha'}
-                                </Button>
-                            </DialogFooter>
-                        </div>
+                            </div>
+                        )}
                     </DialogContent>
                 </Dialog>
 
@@ -856,7 +897,7 @@ export default function Students({ students }: Props) {
                                     <p className="text-sm font-medium text-zinc-500 uppercase tracking-widest">
                                         {selected.student_code}
                                     </p>
-                                    
+
                                     <div className="mt-6 flex w-full flex-col gap-2 border-t pt-6">
                                         <div className="flex justify-between text-xs">
                                             <span className="text-zinc-500">Género</span>
@@ -870,6 +911,18 @@ export default function Students({ students }: Props) {
                                             <span className="text-zinc-500">Estado</span>
                                             <span className={`font-semibold ${selected.is_active ? 'text-emerald-600' : 'text-zinc-400'}`}>
                                                 {selected.is_active ? 'Activo' : 'Inactivo'}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between text-xs">
+                                            <span className="text-zinc-500">Nivel</span>
+                                            <span className="font-semibold text-indigo-600">
+                                                {selected.enrollments?.find(e => e.status === 'active')?.section?.school_level?.level?.name || '-'}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between text-xs">
+                                            <span className="text-zinc-500">Sección</span>
+                                            <span className="font-semibold text-indigo-600">
+                                                {selected.enrollments?.find(e => e.status === 'active')?.section?.name || '-'}
                                             </span>
                                         </div>
                                     </div>
@@ -891,8 +944,8 @@ export default function Students({ students }: Props) {
                                             </h4>
                                             <div className="grid grid-cols-2 gap-y-4 text-sm">
                                                 <div>
-                                                    <p className="text-xs text-zinc-400 capitalize">Correo Electrónico</p>
-                                                    <p className="font-medium break-words">{selected.user?.email || '-'}</p>
+                                                    <p className="text-xs text-zinc-400 capitalize">Condición</p>
+                                                    <p className="font-medium break-words capitalize">{selected.condition || 'Nuevo'}</p>
                                                 </div>
                                                 <div>
                                                     <p className="text-xs text-zinc-400 capitalize">Cédula de Identidad</p>
@@ -903,11 +956,11 @@ export default function Students({ students }: Props) {
                                                     <p className="font-medium">
                                                         {selected.birth_date
                                                             ? new Date(
-                                                                  selected.birth_date +
-                                                                      'T00:00:00',
-                                                              ).toLocaleDateString(
-                                                                  'es-ES',
-                                                              )
+                                                                selected.birth_date +
+                                                                'T00:00:00',
+                                                            ).toLocaleDateString(
+                                                                'es-ES',
+                                                            )
                                                             : '-'}
                                                     </p>
                                                 </div>

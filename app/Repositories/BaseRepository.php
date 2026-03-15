@@ -5,10 +5,8 @@ namespace App\Repositories;
 use App\Contracts\RepositoryContract;
 use Illuminate\Database\Eloquent\Model;
 
-
-class   BaseRepository implements RepositoryContract
+class BaseRepository implements RepositoryContract
 {
-
     public $model;
 
     public function __construct(Model $model)
@@ -18,10 +16,16 @@ class   BaseRepository implements RepositoryContract
 
     public function search(array $filters = [], ?int $limit = 10, ?int $offset = 0)
     {
-        if($limit && $offset) {
+        if ($limit && $offset) {
             $this->model->limit($limit)->offset($offset);
         }
+
         return $this->model->get();
+    }
+
+    public function first(array $filters = []): ?Model
+    {
+        return $this->model->first();
     }
 
     public function find($id)
